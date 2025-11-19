@@ -23,7 +23,6 @@ class PaymentCreatedHandler(EventHandler):
         """Execute every time the event is published"""
         # TODO: Consultez le diagramme de machine à états pour savoir quelle opération effectuer dans cette méthode. Mettez votre commande à jour avec le nouveau payment_id.
         # N'oubliez pas d'enregistrer le payment_link dans votre commande
-        event_data["payment_link"] = "todo-add-payment-link-here"
 
         try:
             # Si l'operation a réussi, déclenchez SagaCompleted.
@@ -33,6 +32,8 @@ class PaymentCreatedHandler(EventHandler):
 
         except Exception as e:
             # TODO: Si l'operation a échoué, déclenchez l'événement adéquat selon le diagramme.
+            event_data['event'] = "PaymentCreationFailed"
             event_data['error'] = str(e)
+            OrderEventProducer().get_instance().send(config.KAFKA_TOPIC, value=event_data)
 
 

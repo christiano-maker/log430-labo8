@@ -26,6 +26,8 @@ from stocks.controllers.stock_controller import get_stock, populate_redis_on_sta
 
 app = Flask(__name__)
 
+
+
 # Auto-populate Redis 5s after API startup (to give enough time for the DB to start up as well)
 thread = threading.Timer(10.0, populate_redis_on_startup)
 thread.daemon = True
@@ -50,6 +52,14 @@ consumer_service = OrderEventConsumer(
     registry=registry
 )
 consumer_service.start()
+
+from payments.outbox_processor import OutboxProcessor
+
+# il faut éxécuter le processeur seulement 1 fois à chaque initialisation
+is_outbox_processor_running = False
+if not is_outbox_processor_running:
+   OutboxProcessor().run()
+   is_outbox_processor_running = True
 
 @app.get('/health-check')
 def health():
